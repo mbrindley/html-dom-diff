@@ -13,6 +13,8 @@ Gem::Specification.new do |s|
   s.files = `git ls-files README.md LICENSE lib`.split
   s.test_files = `git ls-files specs`.split
 
+  s.add_dependency 'nokogiri'
+  s.add_dependency 'pqueue'
   s.add_development_dependency 'rspec'
 
   s.summary = 'Diff between HTML documents'

@@ -1,3 +1,3 @@
 module HTMLDiff
-  VERSION = "1.2.5"
+  VERSION = "0.1"
 end
