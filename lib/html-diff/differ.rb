@@ -5,7 +5,11 @@ require 'pqueue'
 module HTMLDiff
   class Differ
     def diff_strings(left, right)
-      diff parse(left), parse(right)
+      diff parse(left).root, parse(right).root
+    end
+
+    def diff_fragments(left, right)
+      diff parse_fragments(left).child, parse_fragments(right).child
     end
 
     def diff(ldoc, rdoc)
@@ -15,17 +19,25 @@ module HTMLDiff
       prep_with @lsignatures, ldoc
       prep_with @rsignatures, rdoc
 
+      perform_initial_top_down_matching [ldoc], [rdoc]
+
       @matchqueue.push(rdoc)
       perform_initial_matching
 
       match_bottom_up ldoc
       match_top_down  ldoc
+
+      DeltaTreeBuilder.new(ldoc, rdoc, @weights, @forward, @backward).build
     end
 
     private
 
     def parse(string)
       Nokogiri::HTML(string, nil, nil, (Nokogiri::XML::ParseOptions::DEFAULT_HTML & Nokogiri::XML::ParseOptions::NOBLANKS))
+    end
+
+    def parse_fragments(string)
+      Nokogiri::HTML::DocumentFragment.parse(string)
     end
 
     def reset
@@ -90,10 +102,24 @@ module HTMLDiff
       @backward[right] = left
     end
 
+    def perform_initial_top_down_matching(lnodes, rnodes)
+      _lnodes = lnodes.reject(&:text?)
+      _rnodes = rnodes.reject(&:text?)
+
+      _lnodes.each do |lnode|
+        lcounts    = _lnodes.count  { |c| c.name == lnode.name }
+        candidates = _rnodes.select { |c| c.name == lnode.name }
+        if lcounts == 1 && candidates.size == 1
+          record_matching lnode, candidates.first
+          perform_initial_top_down_matching lnode.children, candidates.first.children
+        end
+      end
+    end
+
     def perform_initial_matching
       while @matchqueue.size > 0
         element = @matchqueue.pop
-        if match = find_best_match(element)
+        if @backward[element].nil? && (match = find_best_match(element))
           match_all_children match, element
           match_parents match, element
         else

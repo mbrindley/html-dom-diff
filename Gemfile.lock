@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    html-diff (1.2.5)
+    html-diff (0.1)
       nokogiri
       pqueue
 
