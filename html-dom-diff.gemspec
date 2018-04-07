@@ -2,9 +2,9 @@
 require File.expand_path('../lib/html-diff/version', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name = 'html-diff'
-  s.version = HTMLDiff::VERSION
-  s.homepage = 'https://github.com/derfred/html-diff'
+  s.name = 'html-dom-diff'
+  s.version = HTMLDOMDiff::VERSION
+  s.homepage = 'https://github.com/derfred/html-dom-diff'
   s.licenses = ['MIT']
 
   s.authors = ["Frederik Fix"]

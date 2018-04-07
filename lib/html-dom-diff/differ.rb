@@ -2,7 +2,7 @@ require 'nokogiri'
 require 'digest'
 require 'pqueue'
 
-module HTMLDiff
+module HTMLDOMDiff
   class Differ
     def diff_strings(left, right)
       diff parse(left).root, parse(right).root

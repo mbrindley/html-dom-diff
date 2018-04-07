@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../lib/html-diff')
+require File.expand_path(File.dirname(__FILE__) + '/../lib/html-dom-diff')
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

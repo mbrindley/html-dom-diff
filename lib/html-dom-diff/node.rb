@@ -1,4 +1,4 @@
-module HTMLDiff
+module HTMLDOMDiff
   class Node
     attr_reader :parent, :children
 

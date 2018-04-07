@@ -1,4 +1,4 @@
-RSpec.describe HTMLDiff::Differ do
+RSpec.describe HTMLDOMDiff::Differ do
   def diff_strings(left, right)
     described_class.new.diff_strings(left, right)
   end

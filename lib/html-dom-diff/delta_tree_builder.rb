@@ -1,4 +1,4 @@
-module HTMLDiff
+module HTMLDOMDiff
   class DeltaTreeBuilder
     attr_reader :ldoc, :rdoc
     def initialize(ldoc, rdoc, weights, forward, backward)
