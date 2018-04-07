@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    html-diff (0.1)
+    html-dom-diff (0.1)
       nokogiri
       pqueue
 
@@ -70,7 +70,7 @@ PLATFORMS
 DEPENDENCIES
   guard
   guard-rspec
-  html-diff!
+  html-dom-diff!
   rake
   rspec
 
