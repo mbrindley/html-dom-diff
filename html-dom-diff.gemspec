@@ -1,5 +1,5 @@
 
-require File.expand_path('../lib/html-diff/version', __FILE__)
+require File.expand_path('../lib/html-dom-diff/version', __FILE__)
 
 Gem::Specification.new do |s|
   s.name = 'html-dom-diff'
