@@ -13,7 +13,7 @@ module HTMLDOMDiff
     end
 
     def diff(ldoc, rdoc)
-      reset
+      reset ldoc, rdoc
 
       match_by_ids ldoc, rdoc
       prep_with @lsignatures, ldoc
@@ -27,10 +27,16 @@ module HTMLDOMDiff
       match_bottom_up ldoc
       match_top_down  ldoc
 
-      DeltaTreeBuilder.new(ldoc, rdoc, @weights, @forward, @backward).build
+      @builder.build
     end
 
     private
+
+    [:left_matches?, :left_match, :left_matched?, :right_matched?].each do |m|
+      define_method m do |*args|
+        @builder.send m, *args
+      end
+    end
 
     def parse(string)
       Nokogiri::HTML(string, nil, nil, (Nokogiri::XML::ParseOptions::DEFAULT_HTML & Nokogiri::XML::ParseOptions::NOBLANKS))
@@ -40,14 +46,12 @@ module HTMLDOMDiff
       Nokogiri::HTML::DocumentFragment.parse(string)
     end
 
-    def reset
-      @forward     = {}
-      @backward    = {}
-      @weights     = {}
+    def reset(ldoc, rdoc)
+      @builder     = DeltaTreeBuilder.new(ldoc, rdoc)
       @depths      = {}
       @lsignatures = {}
       @rsignatures = {}
-      @matchqueue  = PQueue.new() { |a, b| @weights[a] > @weights[b] }
+      @matchqueue  = PQueue.new() { |a, b| @builder.weight(a) > @builder.weight(b) }
     end
 
     def match_by_ids(ldoc, rdoc)
@@ -70,11 +74,11 @@ module HTMLDOMDiff
         signatures << signature
       end
 
-      @weights[element] = weights
+      @builder.add_weight(element, weights)
       sig_hash[element] = hash_for(signatures)
       @depths[element]  = level
 
-      [ @weights[element], sig_hash[element] ]
+      [ weights, sig_hash[element] ]
     end
 
     def weight_for(element)
@@ -98,8 +102,7 @@ module HTMLDOMDiff
     end
 
     def record_matching(left, right)
-      @forward[left]   = right
-      @backward[right] = left
+      @builder.match(left, right)
     end
 
     def perform_initial_top_down_matching(lnodes, rnodes)
@@ -119,7 +122,7 @@ module HTMLDOMDiff
     def perform_initial_matching
       while @matchqueue.size > 0
         element = @matchqueue.pop
-        if @backward[element].nil? && (match = find_best_match(element))
+        if !right_matched?(element) && (match = find_best_match(element))
           match_all_children match, element
           match_parents match, element
         else
@@ -131,7 +134,7 @@ module HTMLDOMDiff
     def find_best_match(element)
       candidates = []
       @lsignatures.each do |left, sig|
-        if @forward[left].nil? && sig == @rsignatures[element]
+        if !left_matched?(left) && sig == @rsignatures[element]
           candidates << left
         end
       end
@@ -142,7 +145,7 @@ module HTMLDOMDiff
         return candidates.first
       else
         matching_parents = candidates.select do |left|
-          @forward[left.parent] == element.parent
+          left_matches?(left.parent, element.parent)
         end
 
         if matching_parents.size == 1
@@ -162,9 +165,9 @@ module HTMLDOMDiff
 
     def match_parents(left, right)
       # TODO implement multi-ancestor matching
-      return if @forward[left.parent] || @backward[right.parent]
+      return if left_matched?(left.parent) || right_matched?(right.parent)
       if left.parent.name == right.parent.name
-        record_matching left, right
+        record_matching left.parent, right.parent
       end
     end
 
@@ -173,16 +176,17 @@ module HTMLDOMDiff
         match_bottom_up child
       end
 
-      if element.respond_to?(:parent) && @forward[element.parent]
-        match = @forward[element.parent].children.find { |c| @backward[c].nil? && c.name == element.name }
+      if !left_matched?(element) && element.respond_to?(:parent) && left_matched?(element.parent)
+        children = left_match(element.parent).children.reject { |c| right_matched?(c) }
+        match    = children.find { |c| c.name == element.name }
         record_matching(element, match) if match
       end
     end
 
     def match_top_down(element)
-      if @forward[element].nil?
-        childmatches = element.children.map { |c| @forward[c] && @forward[c].parent }.compact.uniq
-        childmatches.reject! { |e| @backward[e] }
+      unless left_matched?(element)
+        childmatches = element.children.select { |c| left_matched?(c) }.map { |c| left_match(c).parent }.uniq
+        childmatches.reject! { |e| right_matched?(e) }
         if childmatches.size == 1 && childmatches.first.name == element.name
           record_matching(element, childmatches.first)
         end
