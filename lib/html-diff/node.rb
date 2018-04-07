@@ -21,11 +21,11 @@ module HTMLDiff
 
     # attributes
     def attributes
-      @rnode.attributes
+      @rnode.attributes if @rnode
     end
 
     def original_attributes
-      @lnode.attributes
+      @lnode.attributes if @lnode
     end
 
     def changed_attribute_names
@@ -53,6 +53,10 @@ module HTMLDiff
       else
         @lnode.name
       end
+    end
+
+    def text?
+      (@rnode||@lnode).text?
     end
 
     def to_html
