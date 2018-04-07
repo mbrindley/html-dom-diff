@@ -106,7 +106,7 @@ module HTMLDiff
     def attributes_changed?
       return true if attributes.size != original_attributes.size
       attributes.each do |k, v|
-        if v != original_attributes[k]
+        if original_attributes[k].nil? || v.value != original_attributes[k].value
           return true
         end
       end

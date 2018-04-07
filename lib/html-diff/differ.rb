@@ -78,7 +78,7 @@ module HTMLDiff
     end
 
     def weight_for(element)
-      if element.text?
+      if element.text? or element.cdata?
         1 + Math.log(element.text.size)
       else
         1
@@ -86,7 +86,7 @@ module HTMLDiff
     end
 
     def signature_part_for(element)
-      if element.text?
+      if element.text? or element.cdata?
         element.text
       else
         element.name

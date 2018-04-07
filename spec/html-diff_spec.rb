@@ -90,5 +90,22 @@ RSpec.describe HTMLDiff::Differ do
       expect(node.children.first).to be_matched
       expect(node.children.first.children.first).to be_moved
     end
+
+    it "matches cdata-sections" do
+      input = <<-EOF
+<html>
+  <head>
+    <style type='text/css'>
+body {
+  background: red;
+}
+    </style>
+  </head>
+<html>
+EOF
+      node = diff_strings input, input
+      expect(node.self_and_all_children).to_not include(be_changed)
+      expect(node.self_and_all_children).to all(be_matched)
+    end
   end
 end
