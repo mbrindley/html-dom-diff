@@ -1,10 +1,10 @@
 RSpec.describe HTMLDOMDiff::Differ do
   def diff_strings(left, right)
-    described_class.new.diff_strings(left, right)
+    described_class.new.diff_strings(left, right).root
   end
 
   def diff_fragments(left, right)
-    described_class.new.diff_fragments(left, right)
+    described_class.new.diff_fragments(left, right).root
   end
 
   describe "node-level changes" do

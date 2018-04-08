@@ -9,8 +9,12 @@ module HTMLDOMDiff
       @backward = {}
     end
 
-    def build
+    def root
       wrap @rdoc
+    end
+
+    def total_weight
+      @weights[ldoc].to_f + @weights[rdoc].to_f
     end
 
     def add_weight(element, weight)
@@ -45,7 +49,7 @@ module HTMLDOMDiff
     private
 
     def wrap(rnode, parent=nil)
-      result = Node.new rnode, @backward[rnode], parent
+      result = Node.new rnode, @backward[rnode], @weights[rnode], parent
       rnode.children.each do |child|
         wrap child, result
       end
@@ -62,7 +66,7 @@ module HTMLDOMDiff
 
     def reverse_wrap(lnode, parent)
       return if @forward[lnode]
-      result = Node.new nil, lnode
+      result = Node.new nil, lnode, @weights[lnode]
       lnode.children.each { |c| reverse_wrap c, result }
       parent.add_child result
     end

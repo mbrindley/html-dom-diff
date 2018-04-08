@@ -27,7 +27,7 @@ module HTMLDOMDiff
       match_bottom_up ldoc
       match_top_down  ldoc
 
-      @builder.build
+      @builder
     end
 
     private

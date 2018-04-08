@@ -1,12 +1,13 @@
 module HTMLDOMDiff
   class Node
-    attr_reader :parent, :children
+    attr_reader :parent, :children, :weight
 
     attr_reader :rnode
 
-    def initialize(rnode, lnode, parent=nil)
+    def initialize(rnode, lnode, weight, parent=nil)
       @rnode    = rnode
       @lnode    = lnode
+      @weight   = weight
       @parent   = parent
       @children = []
     end
@@ -71,6 +72,7 @@ module HTMLDOMDiff
 
     # states
     def changed?
+      return false unless @rnode && @lnode
       if @rnode.text?
         text != original_text
       else
