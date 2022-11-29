@@ -39,7 +39,7 @@ module HTMLDOMDiff
     end
 
     def parse(string)
-      Nokogiri::HTML(string, nil, nil, (Nokogiri::XML::ParseOptions::DEFAULT_HTML & Nokogiri::XML::ParseOptions::NOBLANKS))
+      Nokogiri::HTML(string, nil, nil, Nokogiri::XML::ParseOptions::DEFAULT_HTML)
     end
 
     def parse_fragments(string)
